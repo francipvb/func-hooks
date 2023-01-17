@@ -1,0 +1,87 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: local
+    hooks:
+      - id: install
+        entry: poetry
+        name: Install dependencies
+        language: system
+
+        pass_filenames: false
+        args:
+          - "install"
+
+      - id: autoflake
+        entry: poetry
+        language: system
+        name: Autoflake
+        args:
+          - "run"
+          - "autoflake"
+          - "--in-place"
+
+      - id: mypy
+        name: Run mypy
+        language: system
+        types:
+          - python
+        entry: "poetry"
+        args:
+          - "run"
+          - "mypy"
+      - id: pylint
+        name: pylint
+        entry: poetry
+        language: system
+        types: [python]
+        args: [
+            "run",
+            "pylint",
+
+            "-rn", # Only display messages
+            "-sn", # Don't display the score
+          ]
+
+      - id: test
+        language: system
+        entry: poetry
+        name: Run tests
+        types:
+          - "python"
+        args:
+          - "run"
+          - "pytest"
+          - "--doctest-modules"
+          - "--verbose"
+        verbose: true
+        pass_filenames: false
+
+      - id: ruff
+        entry: poetry
+        language: system
+        name: "Check files with ruff"
+        types:
+          - python
+        args:
+          - "run"
+          - "ruff"
+          - "--target-version"
+          - "py38"
+          - "--fix"
+
+      - id: black
+        entry: poetry
+        name: Black
+        types:
+          - python
+        language: system
+        args:
+          - "run"
+          - "black"
