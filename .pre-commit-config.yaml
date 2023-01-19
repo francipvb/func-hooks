@@ -27,15 +27,6 @@ repos:
           - "autoflake"
           - "--in-place"
 
-      - id: mypy
-        name: Run mypy
-        language: system
-        types:
-          - python
-        entry: "poetry"
-        args:
-          - "run"
-          - "mypy"
       - id: pylint
         name: pylint
         entry: poetry

@@ -1,26 +1,19 @@
-import typing
-import typing_extensions
+"""Function hooks decorator.
 
-_P = typing_extensions.ParamSpec("_P")
-_R = typing.TypeVar("_R")
+The decorator adds functionality to run code before, after and on function error.
 
+This adds extension points to the decorated function or method.
+"""
 
-class Hooks(typing.Generic[_P, _R]):
-    def __init__(self, func: typing.Callable[_P, _R]) -> None:
-        super().__init__()
-        self.func = func
+from .decorator import hooks
+from .sync import Hooks
+from .typing import Invocation, InvocationError, InvocationResult
 
-    def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _R:
-        return self.func(*args, **kwds)
-
-    def _run_pre_hooks(self):
-        pass
-
-    def _run_post(self, result: _R, *args: _P.args, **kwargs: _P.kwargs):
-        pass
-
-    def before(self):
-        pass
-
-    def after(self):
-        pass
+__all__ = [
+    "Hooks",
+    "hooks",
+    # Type definitions:
+    "Invocation",
+    "InvocationError",
+    "InvocationResult",
+]
