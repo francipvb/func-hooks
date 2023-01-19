@@ -1,4 +1,5 @@
 """The decorator module."""
+from functools import wraps
 import typing
 
 import typing_extensions
@@ -25,4 +26,5 @@ def hooks(func: typing.Callable[_P, _R_co]) -> Hooks[_P, _R_co]:
     if not callable(func):
         raise ValueError("Provided function is not callable.")
 
-    return Hooks(func)
+    return wraps(func)(Hooks(func))
+    # return

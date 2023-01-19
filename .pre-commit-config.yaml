@@ -50,7 +50,6 @@ repos:
           - "run"
           - "pytest"
           - "--doctest-modules"
-          - "--verbose"
         verbose: true
         pass_filenames: false
 

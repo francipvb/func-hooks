@@ -1,5 +1,6 @@
 """Synchronous hooks implementation."""
 import asyncio
+from functools import partial
 import typing
 import warnings
 
@@ -131,3 +132,11 @@ class Hooks(BaseHooks[typing.Callable[_P, _FR], typing.Any], typing.Generic[_P, 
         """
         self._result_hooks.add(func)
         return func
+
+    def __get__(
+        self, obj: object, objtype: typing.Optional[typing.Type[object]] = None
+    ):
+        from .decorator import hooks  # pylint: disable=import-outside-toplevel
+
+        obj_hooks = partial(self, obj)
+        return hooks(obj_hooks)
