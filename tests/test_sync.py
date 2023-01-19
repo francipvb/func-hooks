@@ -100,7 +100,7 @@ def test_collect_before_errors():
     error = Exception()
 
     hooks = func_hooks.Hooks(func)
-    error_mock = mock.Mock(side_effect=error)
+    error_mock = mock.MagicMock(side_effect=error)
     hooks.on_before(error_mock)
 
     def _results(results: typing.Dict[str, typing.Any]):
@@ -117,7 +117,7 @@ def test_collect_after_errors():
     error = Exception()
 
     hooks = func_hooks.Hooks(func)
-    hooks.on_after(mock.Mock(side_effect=error))
+    hooks.on_after(mock.MagicMock(side_effect=error))
 
     def _results(results: typing.Dict[str, typing.Any]):
         assert error in results["after_errors"]

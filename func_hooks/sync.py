@@ -1,12 +1,13 @@
 """Synchronous hooks implementation."""
 import asyncio
 import typing
-
-import typing_extensions
+import warnings
 
 import anyio
+import typing_extensions
 
 from .base import BaseHooks
+from .exceptions import CallWarning
 from .typing import Invocation, InvocationError, InvocationResult
 
 _P = typing_extensions.ParamSpec("_P")
@@ -85,28 +86,25 @@ class Hooks(BaseHooks[typing.Callable[_P, _FR], typing.Any], typing.Generic[_P, 
         return results["result"]  # type: ignore
 
     def _run_results_hook(self, results: typing.Dict[str, typing.Any]) -> None:
-        for item in self._result_hooks.copy():
-            item(results)
+        self._run_hooks(results, list(self._result_hooks))
 
     def _run_pre_hooks(self, invocation: Invocation[typing.Any]):
-        errors: typing.List[BaseException] = []
-
-        for item in self.get_before_hooks(clean_once=True):
-            try:
-                if not asyncio.iscoroutinefunction(item):
-                    item(invocation.copy())  # type: ignore
-                else:
-                    anyio.from_thread.run(item, invocation.copy())
-            except BaseException as exc:  # pylint: disable=broad-except
-                errors.append(exc)
-        return errors
+        return self._run_hooks(invocation, list(self.get_before_hooks(clean_once=True)))
 
     def _run_post_hooks(
         self, invocation_result: InvocationResult[typing.Any, typing.Any]
     ):
+        hook_list = list(self.get_after_hooks(clean_once=True))
+        return self._run_hooks(invocation_result, hook_list)
+
+    def _run_hooks(
+        self,
+        invocation_result: typing.Any,
+        hook_list: typing.List[typing.Callable[[typing.Any], typing.Any]],
+    ):
         errors: typing.List[BaseException] = []
 
-        for item in self.get_after_hooks(clean_once=True):
+        for item in hook_list:
             try:
                 if not asyncio.iscoroutinefunction(item):
                     item(invocation_result.copy())  # type: ignore
@@ -114,21 +112,11 @@ class Hooks(BaseHooks[typing.Callable[_P, _FR], typing.Any], typing.Generic[_P, 
                     anyio.from_thread.run(item, invocation_result.copy())
             except BaseException as exc:  # pylint: disable=broad-except
                 errors.append(exc)
+                warnings.warn(f"Error while calling {item!r}: {exc!r}", CallWarning)
         return errors
 
     def _run_error_hooks(self, result: InvocationError[typing.Any]):
-        errors: typing.List[BaseException] = []
-
-        for item in self.get_error_hooks(clean_once=True):
-            try:
-                if not asyncio.iscoroutinefunction(item):
-                    item(result.copy())  # type: ignore
-                else:
-                    anyio.from_thread.run(item, result.copy())
-            except BaseException as exc:  # pylint: disable=broad-except
-                errors.append(exc)
-
-        return errors
+        return self._run_hooks(result, list(self.get_error_hooks(clean_once=True)))
 
     def on_results(
         self, func: typing.Callable[[typing.Dict[str, typing.Any]], None]
