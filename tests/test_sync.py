@@ -3,7 +3,12 @@ import typing
 from unittest import mock
 
 import pytest
+
 import func_hooks
+
+pytestmark = [
+    pytest.mark.filterwarnings("ignore:Error while calling"),
+]
 
 
 def test_run_func():

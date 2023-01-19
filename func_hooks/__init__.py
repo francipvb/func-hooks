@@ -4,7 +4,7 @@ The decorator adds functionality to run code before, after and on function error
 
 This adds extension points to the decorated function or method.
 """
-
+from .exceptions import CallWarning
 from .decorator import hooks
 from .sync import Hooks
 from .typing import Invocation, InvocationError, InvocationResult
@@ -16,4 +16,6 @@ __all__ = [
     "Invocation",
     "InvocationError",
     "InvocationResult",
+    # Exceptions and warnings:
+    "CallWarning",
 ]
